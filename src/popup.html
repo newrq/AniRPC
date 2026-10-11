@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="head">
+    <div class="logo">AniRPC</div>
+    <button id="langBtn" class="lang-btn" data-lang="ru" aria-label="Switch to English"><span class="opt" data-opt="ru">RU</span><span class="opt" data-opt="en">EN</span><span class="thumb" aria-hidden="true"></span></button>
+    <div class="status" id="status"><span class="dot"></span><span id="statusText">Ожидание…</span></div>
+  </header>
+
+  <label class="row power">
+    <span id="powerLabel">Трансляция статуса</span>
+    <button id="toggle" role="switch" aria-checked="true" aria-label="Трансляция статуса"><span class="knob"></span></button>
+  </label>
+
+  <section class="card now" id="nowCard">
+    <img id="poster" alt="" hidden width="64" height="90">
+    <div class="now-body">
+      <div class="now-title" id="nowTitle">Ничего не воспроизводится</div>
+      <div class="now-sub" id="nowSub">Открой серию на поддерживаемом сайте</div>
+      <div class="bar" id="bar" hidden><span id="barFill"></span><i class="bar-dot" id="barDot"></i></div>
+      <div class="now-time" id="nowTime" hidden></div>
+    </div>
+  </section>
+
+  <section class="card sites-card">
+    <div class="sites-title" id="sitesTitle">Сайты</div>
+    <div class="sites" id="sites"></div>
+  </section>
+
+  <div class="donate-wrap">
+    <a class="donate" id="donate" href="https://www.patreon.com/cw/howoka" target="_blank" rel="noopener" aria-label="Поддержать автора">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+      <span id="donateText">Поддержать автора</span>
+    </a>
+  </div>
+
+<script src="popup.js"></script>
+</body>
+</html>
