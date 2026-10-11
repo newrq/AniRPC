@@ -1,47 +1,105 @@
-# AniRPC — Discord Rich Presence для аниме-сайтов
+<div align="center">
 
-Минимальное MV3-расширение + локальный мост. RU: `ru.yummyani.me`, `yummyanime.tv`, `animego.me`, `jut.su`. EN: `hianimes.se`, `miruro.tv`. Язык переключается кнопкой EN/RU в шапке popup (заодно меняет список сайтов).
+# 🌸 AniRPC
 
-## Зачем мост
+**Discord Rich Presence for anime streaming sites**
 
-Расширение не имеет доступа к Discord IPC-пайпам, поэтому `background.js` шлёт activity по WebSocket на `ws://127.0.0.1:47201`, а `bridge/server.js` (Node + `discord-rpc`) уже публикует его в Discord.
+Minimal Chrome (MV3) extension + a tiny local bridge — see what you watch, right in Discord.
 
-## 1. Discord-приложение (2 мин)
+![Manifest V3](https://img.shields.io/badge/Manifest-V3-f4a6be?style=flat-square)
+![Chrome](https://img.shields.io/badge/Chrome-extension-16181d?style=flat-square)
+![Node](https://img.shields.io/badge/bridge-Node.js-16181d?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-16181d?style=flat-square)
 
-1. https://discord.com/developers/applications → New Application.
-2. Скопируй **Application ID** (это Client ID).
-3. (Опционально) Rich Presence → Art Assets: загрузи иконки `playing` / `paused`.
+</div>
 
-## 2. Запуск моста
+---
+
+## ✨ What it does
+
+Open an episode on a supported site — your Discord status updates automatically:
+
+> **Frieren: Beyond Journey's End**
+> *Season 1 · Episode 12 — AnimeGO*
+> *08:24 / 23:40 elapsed, poster included*
+
+- 🎬 Title, season & episode, playback timeline, anime poster
+- 🌗 RU / EN interface with a slider in the popup header (also switches the site list)
+- 🔌 Connection pill, live "now playing" card, broadcast toggle, per-site pills
+- 💗 Pink-on-dark minimal popup with springy micro-interactions
+
+## 📺 Supported sites
+
+| | RU | | EN |
+|---|---|---|---|
+| 🍥 | `ru.yummyani.me` | 🎞️ | `hianimes.se` (HiAnime) |
+| 🍡 | `yummyanime.tv` | 🌙 | `miruro.tv` (Miruro) |
+| ⛩️ | `animego.me` | | |
+| 🌀 | `jut.su` | | |
+
+## 🧩 Why a bridge?
+
+Browser extensions cannot reach Discord's local IPC pipes, so:
+
+```
+site DOM → content.js → background.js ──WebSocket──▶ bridge/server.js ──IPC──▶ Discord
+                    ws://127.0.0.1:47201        (Node + discord-rpc)
+```
+
+## 🚀 Quickstart
+
+### 1. Discord application *(2 min)*
+
+1. Go to https://discord.com/developers/applications → **New Application**.
+2. Copy the **Application ID** and paste it as `clientId` in `src/background.js`
+   (or export it as `DISCORD_CLIENT_ID` for the bridge — env wins).
+3. *(Optional)* Rich Presence → Art Assets → upload `playing` / `paused` icons.
+
+### 2. Start the bridge
 
 ```powershell
 cd bridge
 npm i
-$env:DISCORD_CLIENT_ID="твой_client_id"; node server.js
-# должен написать: [bridge] ws://127.0.0.1:47201, затем "Discord готов как ..."
+$env:DISCORD_CLIENT_ID="your_client_id"
+node server.js
+# expect: [bridge] ws://127.0.0.1:47201, then "Discord ready as ..."
 ```
 
-Держи окно открытым во время просмотра. Client ID также можно вставить в popup расширения (перекрывает env).
+Keep this window open while watching.
 
-## 3. Установка расширения
+### 3. Install the extension
 
-1. `chrome://extensions` → включи **Режим разработчика**.
-2. **Загрузить распакованное расширение** → выбери папку `MovieRPC` (где лежит `manifest.json`).
-3. Открой серию на одном из 4 сайтов → иконка popup покажет «Подключено» и название.
+1. Open `chrome://extensions` → enable **Developer mode**.
+2. **Load unpacked** → pick the `MovieRPC` folder (the one with `manifest.json`).
+3. Open any episode → the popup shows **Connected** and the title. 💗
 
-## Структура
+## 🗂️ Project structure
 
-- `manifest.json` — MV3, один content-скрипт на 4 домена.
-- `src/content.js` — парсинг DOM: title (per-site селекторы → `og:title`), сезон/эпизод (активная кнопка + regex + URL), постер (`og:image`), время (`<video>`).
-- `src/background.js` — WebSocket-клиент моста, шаблоны строк, дедуп одинаковых activity.
-- `src/popup.*` — статус, «сейчас играет», тумблер, вкл/выкл сайтов.
-- `bridge/` — Node-мост `ws` + `discord-rpc`.
+- `manifest.json` — MV3, one content script matched on all 6 domains.
+- `src/content.js` — DOM parsing: title (per-site selectors → `og:title`), season/episode (active episode button + regex + URL), poster (`og:image`, `video[poster]`), time (`<video>`).
+- `src/background.js` — WebSocket client, status templates, duplicate suppression.
+- `src/popup.*` — status pill, now-playing card, toggle, site pills, RU/EN slider, donate heart.
+- `src/preview.html` — clickable popup mock for design review (dev only, not shipped).
+- `bridge/` — Node bridge (`ws` + `discord-rpc`).
+- `.archify/` — architecture diagram.
 
-## Постеры в RPC
+## 🖼️ Posters in RPC
 
-`largeImageKey` шлётся как https-URL постера (`og:image`). Discord подтягивает внешние URL сам; если твой Client ID без ассетов — картинка всё равно обычно отображается через медиа-прокси.
+`largeImageKey` is sent as the poster's https URL (`og:image`). Discord resolves
+external URLs itself, so artwork usually shows even without uploaded app assets.
 
-## Ограничения
+## ⚠️ Limitations
 
-- На animego / yummyanime видео играет в cross-origin iframe (Kodik) — время и пауза недоступны, статус идёт без прогресс-бара.
-- На jut.su `<video>` в главном DOM — работает всё, включая таймлайн.
+- On **animego / yummyanime** the video plays inside a cross-origin iframe (Kodik) —
+  time and pause state are unreachable, so the status ships without a progress bar.
+- On **jut.su** the `<video>` lives in the main DOM — everything works, timeline included.
+- Closing the episode tab can leave the last status stuck until the next update
+  (known issue — a `pagehide` clear is planned).
+
+---
+
+<div align="center">
+
+Made with 💗 for anime nights · If it made you smile — <a href="https://www.patreon.com/cw/howoka">support the author</a>
+
+</div>
