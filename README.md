@@ -2,13 +2,13 @@
 
 # 🌸 AniRPC
 
-**Discord Rich Presence for anime streaming sites**
+**Discord Rich Presence for anime streaming sites — standalone desktop app**
 
-Minimal Chrome (MV3) extension + a tiny local bridge — see what you watch, right in Discord.
+Watch anime in your own browser. Discord shows what you're watching. No extension, no bridge, no setup.
 
-![Manifest V3](https://img.shields.io/badge/Manifest-V3-f4a6be?style=flat-square)
-![Chrome](https://img.shields.io/badge/Chrome-extension-16181d?style=flat-square)
-![Node](https://img.shields.io/badge/bridge-Node.js-16181d?style=flat-square)
+![Electron](https://img.shields.io/badge/Electron-app-f4a6be?style=flat-square)
+![Discord RPC](https://img.shields.io/badge/Discord-RPC-16181d?style=flat-square)
+![i18n](https://img.shields.io/badge/RU-EN-16181d?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-16181d?style=flat-square)
 
 </div>
@@ -17,16 +17,18 @@ Minimal Chrome (MV3) extension + a tiny local bridge — see what you watch, rig
 
 ## ✨ What it does
 
-Open an episode on a supported site — your Discord status updates automatically:
+Open an episode on a supported site — your Discord status updates by itself:
 
 > **Frieren: Beyond Journey's End**
 > *Season 1 · Episode 12 — AnimeGO*
-> *08:24 / 23:40 elapsed, poster included*
 
-- 🎬 Title, season & episode, playback timeline, anime poster
-- 🌗 RU / EN interface with a slider in the popup header (also switches the site list)
-- 🔌 Connection pill, live "now playing" card, broadcast toggle, per-site pills
-- 💗 Pink-on-dark minimal popup with springy micro-interactions
+- 🎬 Title, season & episode, anime poster — picked up automatically
+- 🌗 Full RU / EN interface (slider in the header) — Discord texts switch too
+- 🔌 Honest connection pill, live "now playing" card with a captured-site badge
+- 🎚️ Broadcast toggle, per-site pills, Patreon heart, autostart rocket
+  (hover for a tooltip, click to put the app into Windows autostart)
+- 😴 Idle shows “Watching nothing” instead of a stale or empty status
+- 💗 Pink-on-dark UI with springy micro-interactions
 
 ## 📺 Supported sites
 
@@ -37,64 +39,48 @@ Open an episode on a supported site — your Discord status updates automaticall
 | ⛩️ | `animego.me` | | |
 | 🌀 | `jut.su` | | |
 
-## 🧩 Why a bridge?
+## 🚀 Run it (no setup)
 
-Browser extensions cannot reach Discord's local IPC pipes, so:
-
-```
-site DOM → content.js → background.js ──WebSocket──▶ bridge/server.js ──IPC──▶ Discord
-                    ws://127.0.0.1:47201        (Node + discord-rpc)
-```
-
-## 🚀 Quickstart
-
-### 1. Discord application *(2 min)*
-
-1. Go to https://discord.com/developers/applications → **New Application**.
-2. Copy the **Application ID** and paste it as `clientId` in `src/background.js`
-   (or export it as `DISCORD_CLIENT_ID` for the bridge — env wins).
-3. *(Optional)* Rich Presence → Art Assets → upload `playing` / `paused` icons.
-
-### 2. Start the bridge
+Requirements: [Node.js LTS](https://nodejs.org/) + the Discord **desktop** app running.
 
 ```powershell
-cd bridge
 npm i
-$env:DISCORD_CLIENT_ID="your_client_id"
-node server.js
-# expect: [bridge] ws://127.0.0.1:47201, then "Discord ready as ..."
+npm start
 ```
 
-Keep this window open while watching.
+That's it. The Application ID is built in, settings live next to the app —
+there is nothing to configure.
 
-### 3. Install the extension
+## 🧩 How it works
 
-1. Open `chrome://extensions` → enable **Developer mode**.
-2. **Load unpacked** → pick the `MovieRPC` folder (the one with `manifest.json`).
-3. Open any episode → the popup shows **Connected** and the title. 💗
+```
+your browser ──History──▶ main ──fetch + parse──▶ Discord client
+ episode URL        title · series · poster        discord-rpc
+```
 
-## 🗂️ Project structure
+You watch in **your own Chrome, Edge or Brave**. Every 15 seconds the app reads
+a throwaway copy of the browser history (your data never leaves the machine),
+takes the latest page on the 6 supported sites, fetches that page itself and
+extracts the title, season/episode and poster. Sending is deduplicated, failed
+sends are retried after reconnect — the status never freezes silently.
 
-- `manifest.json` — MV3, one content script matched on all 6 domains.
-- `src/content.js` — DOM parsing: title (per-site selectors → `og:title`), season/episode (active episode button + regex + URL), poster (`og:image`, `video[poster]`), time (`<video>`).
-- `src/background.js` — WebSocket client, status templates, duplicate suppression.
-- `src/popup.*` — status pill, now-playing card, toggle, site pills, RU/EN slider, donate heart.
-- `src/preview.html` — clickable popup mock for design review (dev only, not shipped).
-- `bridge/` — Node bridge (`ws` + `discord-rpc`).
-- `.archify/` — architecture diagram.
+- `main.js` — app window, history watcher (`sql.js`), page parser, settings
+  (`settings.json`), direct Discord RPC with reconnect.
+- `preload-ui.js` + `renderer/` — the app window UI (status, toggle, sites, language, donate).
 
 ## 🖼️ Posters in RPC
 
-`largeImageKey` is sent as the poster's https URL (`og:image`). Discord resolves
-external URLs itself, so artwork usually shows even without uploaded app assets.
+The poster's https URL is sent as the large image — Discord resolves external
+URLs itself, so artwork usually shows even without uploaded app assets. Sites
+without `og:image` fall back to poster `<img>` tags.
 
 ## ⚠️ Limitations
 
-- On **animego / yummyanime** the video plays inside a cross-origin iframe (Kodik) —
-  time and pause state are unreachable, so the status ships without a progress bar.
-- On **jut.su** the `<video>` lives in the main DOM — everything works, timeline included.
-- Closing the episode tab can leave the last status stuck until the next update
-  (known issue — a `pagehide` clear is planned).
+- No playback timeline or pause state — the app sees the episode page, not the
+  player. The status shows title, series and poster.
+- Only Chrome / Edge / Brave history is read (Default profile, last 30 minutes).
+  Firefox, Opera, Yandex and other profiles are not covered yet.
+- RPC needs the Discord desktop app open; without it the pill shows **No Discord**.
 
 ---
 

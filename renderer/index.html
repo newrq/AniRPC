@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="popup.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="head">
@@ -21,6 +21,7 @@
     <div class="now-body">
       <div class="now-title" id="nowTitle">Ничего не воспроизводится</div>
       <div class="now-sub" id="nowSub">Открой серию на поддерживаемом сайте</div>
+      <div class="now-site" id="nowSite" hidden><img id="nowSiteIcon" alt="" width="16" height="16"><span class="cap" id="nowSiteCap"></span><span id="nowSiteName"></span></div>
       <div class="bar" id="bar" hidden><span id="barFill"></span><i class="bar-dot" id="barDot"></i></div>
       <div class="now-time" id="nowTime" hidden></div>
     </div>
@@ -31,13 +32,20 @@
     <div class="sites" id="sites"></div>
   </section>
 
+  <div class="rocket-wrap">
+    <button class="rocket" id="rocket" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+    </button>
+    <div class="rocket-tip" id="rocketTip" role="tooltip">Автозагрузка</div>
+  </div>
+
   <div class="donate-wrap">
-    <a class="donate" id="donate" href="https://www.patreon.com/cw/howoka" target="_blank" rel="noopener" aria-label="Поддержать автора">
+    <a class="donate" id="donate" href="https://www.patreon.com/cw/howoka" aria-label="Поддержать автора">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
       <span id="donateText">Поддержать автора</span>
     </a>
   </div>
 
-<script src="popup.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
